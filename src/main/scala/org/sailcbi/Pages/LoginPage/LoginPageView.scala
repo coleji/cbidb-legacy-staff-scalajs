@@ -5,20 +5,43 @@ import fr.hmil.roshttp.response.SimpleHttpResponse
 import fr.hmil.roshttp.{HttpRequest, Method}
 import org.sailcbi.CbiUtil.Currency
 import org.sailcbi.Components.{Button, Item, JoomlaArticleRegion}
-import org.sailcbi.Core.{Main, Message, View}
+import org.sailcbi.Core.Main.Target
+import org.sailcbi.Core._
 import org.sailcbi.VNode.SnabbdomFacade.VNode
 import org.sailcbi.VNode.VNodeContents._
 import org.sailcbi.VNode._
-import org.sailcbi.ViewTemplates.{ StandardPage}
+import org.sailcbi.ViewTemplates.StandardPage
 
 import scala.concurrent.Promise
 import scala.scalajs.js
 import scala.util.{Failure, Success}
+import org.scalajs
 
 class LoginPageView (renderer: VNodeContents[_] => Unit) extends StandardPage[LoginPageModel](renderer) {
   val self = this
-  override val defaultModel: LoginPageModel = LoginPageModel(None, None, Currency.dollars(325), 2017)
-  def makeLoginFunction: (LoginPageModel) => () => Unit = (model: LoginPageModel) => () => {
+  override val defaultModel: LoginPageModel = LoginPageModel(None, None, Currency.dollars(325), 2017, false)
+
+  object ChangeUserName extends Message[LoginPageModel, String] {
+    def update: LoginPageModel => String => LoginPageModel =
+      model => payload => LoginPageModel(Some(payload), model.password, model.jpPrice, model.lastSeason, model.loginRequestPending)
+  }
+  object ChangePassword extends Message[LoginPageModel, String] {
+    def update: LoginPageModel => String => LoginPageModel =
+      model => payload => LoginPageModel(model.userName, Some(payload), model.jpPrice, model.lastSeason, model.loginRequestPending)
+  }
+  object SubmitLoginRequest extends NoArgMessage[LoginPageModel] {
+    def update: LoginPageModel => LoginPageModel =
+      model => {
+        submitLogin(model)
+        LoginPageModel(model.userName, model.password, model.jpPrice, model.lastSeason, true)
+      }
+  }
+  object ReceiveLoginResponse extends NoArgMessage[LoginPageModel] {
+    def update: LoginPageModel => LoginPageModel =
+      model => LoginPageModel(model.userName, None, model.jpPrice, model.lastSeason, false)
+  }
+
+  def submitLogin: (LoginPageModel) => Unit = (model: LoginPageModel) => {
     import monix.execution.Scheduler.Implicits.global
     val p = Promise[View[_]]
     val body = URLEncodedBody(
@@ -29,37 +52,50 @@ class LoginPageView (renderer: VNodeContents[_] => Unit) extends StandardPage[Lo
     val request =
       HttpRequest(Main.API_LOCATION + "/authenticate")
         .withMethod(Method.POST)
-          .withBody(body)
+        .withBody(body)
+
 
     request.send().onComplete({
-      case res:Success[SimpleHttpResponse] =>
-      case _: Failure[SimpleHttpResponse] =>
+      case res:Success[SimpleHttpResponse] => ReceiveLoginResponse(self)(model)()
+      case _: Failure[SimpleHttpResponse] => ReceiveLoginResponse(self)(model)()
     })
   }
-  object ChangeUserName extends Message[LoginPageModel, String] {
-    def update: LoginPageModel => String => LoginPageModel =
-      model => payload => LoginPageModel(Some(payload), model.password, model.jpPrice, model.lastSeason)
-  }
-  object ChangePassword extends Message[LoginPageModel, String] {
-    def update: LoginPageModel => String => LoginPageModel =
-      model => payload => LoginPageModel(model.userName, Some(payload), model.jpPrice, model.lastSeason)
-  }
+
   def getMain(model: LoginPageModel): VNodeContents[_] =
     div(classes=List("auth-form"), contents=VNodeContents(
       div(classes=List("form-group"), contents=VNodeContents(
         div(classes=List("form-label-group"), contents=VNodeContents(
-          input(id="inputUser", props=Map("type"->"text", "placholder"->"Username"), classes=List("form-control")),
+          input(
+            id="inputUser",
+            props=Map("type"->"text", "placholder"->"Username", "required"->"", "autofocus"->"", "value" -> model.userName.getOrElse("")),
+            classes=List("form-control"),
+            events = Map("input" -> ((e: scalajs.dom.TextEvent) => {
+              ChangeUserName(this)(model)(e.target.asInstanceOf[Target].value.toString)
+            }))
+          ),
           label(props=Map("for"->"inputUser"), contents="Username")
         ))
       )),
       div(classes=List("form-group"), contents=VNodeContents(
         div(classes=List("form-label-group"), contents=VNodeContents(
-          input(id="inputPassword", props=Map("type"->"password", "placholder"->"Password"), classes=List("form-control")),
+          input(
+            id="inputPassword",
+            props=Map("type"->"password", "placholder"->"Password", "value" -> model.password.getOrElse("")),
+            classes=List("form-control"),
+            events = Map("input" -> ((e: scalajs.dom.TextEvent) => {
+              ChangePassword(this)(model)(e.target.asInstanceOf[Target].value.toString)
+            }))
+          ),
           label(props=Map("for"->"inputPassword"), contents="Password")
         ))
       )),
       div(classes=List("form-group"), contents=VNodeContents(
-        button(classes=List("btn", "btn-lg", "btn-primary", "btn-block"), props=Map("type"->"submit"), contents="Sign in")
+        button(
+          classes=(if (model.loginRequestPending) "btn-light" else "btn-primary") :: List("btn", "btn-lg", "btn-block"),
+          props=Map("type"->"submit"),
+          events=if(!model.loginRequestPending) Map("click"->SubmitLoginRequest(this)(model)) else Map.empty,
+          contents=if(model.loginRequestPending) VNodeContents("Sign in", "   ", div(classes=List("loader", "loader-sm"))) else ("Sign in")
+        )
       ))
     ))
 }

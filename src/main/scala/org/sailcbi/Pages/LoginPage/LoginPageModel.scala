@@ -7,5 +7,6 @@ case class LoginPageModel(
   userName: Option[String],
   password: Option[String],
   jpPrice: Currency,
-  lastSeason: Int
+  lastSeason: Int,
+  loginRequestPending: Boolean
 ) extends Model

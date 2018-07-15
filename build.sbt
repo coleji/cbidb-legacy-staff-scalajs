@@ -13,6 +13,6 @@ name := "CBI DB Staff Web"
 scalaJSUseMainModuleInitializer := true
 
 libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.2"
-libraryDependencies += "fr.hmil" %%% "roshttp" % "2.0.2"
+libraryDependencies += "fr.hmil" %%% "roshttp" % "2.1.0"
 
 npmDependencies in Compile += "snabbdom" -> "0.7.0"
