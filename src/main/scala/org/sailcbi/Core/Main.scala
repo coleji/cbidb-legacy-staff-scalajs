@@ -2,7 +2,7 @@ package org.sailcbi.Core
 
 import monix.execution.Scheduler.Implicits.global
 import org.sailcbi.VNode.SnabbdomFacade.{VNode, patch, toVNode}
-import org.sailcbi.VNode.div
+import org.sailcbi.VNode.{VNodeContents, div}
 import org.scalajs.dom.document
 
 import scala.scalajs.js
@@ -47,6 +47,9 @@ object Main {
     rootElement = newRoot
   }
 
+  def makeRoot(contents: VNodeContents[_]): VNode =
+    div(id="root", classes=List("app"), contents = contents)
+
   def main(args: Array[String]): Unit = {
     println("starting on path " + Globals.window.location.pathname)
     println("host: " + Globals.window.location.host)
@@ -54,15 +57,16 @@ object Main {
     println("protocol: " + Globals.window.location.protocol)
     println("111222")
     println(API_LOCATION)
-    /*Globals.window.onpopstate = () => {
+    Globals.window.onpopstate = () => {
       println("rendering after popstate")
       Router.route(Globals.window.location.pathname).map(p => {
         p.initialRender()
       })
     }
-    Router.renderer.set((view: VNode) => updateRootElement(div(id = "root", contents = view)))
+    Router.renderer.set((view: VNodeContents[_]) => updateRootElement(makeRoot(view)))
     Router.route(Globals.window.location.pathname).map(p => {
+      println("rendering!")
       p.initialRender()
-    })*/
+    })
   }
 }

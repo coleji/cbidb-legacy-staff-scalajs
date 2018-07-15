@@ -1,12 +1,14 @@
 package org.sailcbi.Core
 
 import org.sailcbi.VNode.SnabbdomFacade.VNode
+import org.sailcbi.VNode.VNodeContents
 
-abstract class View[T <: Model](val renderer: VNode => Unit) {
+abstract class View[T <: Model](val renderer: VNodeContents[_] => Unit) {
   val defaultModel: T
   def initialRender(): Unit = render(defaultModel)
   def render(model: T): Unit = {
-    renderer(getVNode(model))
+    println("in render")
+    renderer(getContent(model))
   }
-  def getVNode(m: T): VNode
+  def getContent(m: T): VNodeContents[_]
 }

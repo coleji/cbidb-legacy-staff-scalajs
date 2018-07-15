@@ -10,18 +10,19 @@ import org.sailcbi.Pages.LoginPage.LoginPageView
 import org.sailcbi.Pages.Test1Page.Test1PageView
 import org.sailcbi.Pages.Test2Page.Test2PageView
 import org.sailcbi.VNode.SnabbdomFacade.VNode
+import org.sailcbi.VNode.VNodeContents
 
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
 import scala.util.{Failure, Success}
 
 object Router {
-  val renderer = new Initializable[VNode => Unit]
+  val renderer = new Initializable[VNodeContents[_] => Unit]
   val enforceLogin = false
   def route(path: String): Future[View[_]] = {
     import monix.execution.Scheduler.Implicits.global
     val p = Promise[View[_]]
-    val request = HttpRequest(Main.API_LOCATION + "/is-logged-in-as-staff")
+   /* val request = HttpRequest(Main.API_LOCATION + "/is-logged-in-as-staff")
     request.send().onComplete({
       case res:Success[SimpleHttpResponse] => {
         val isLoggedIn: Boolean = res.get.body != "false"
@@ -33,11 +34,12 @@ object Router {
         }
         if (pageAndLoginRequired._2 && isLoggedIn) p.success(pageAndLoginRequired._1)
         else if (!pageAndLoginRequired._2) p.success(pageAndLoginRequired._1)
-        else p.success(new LoginPageView(renderer.get))
+        else p.success(new Test1PageView(renderer.get))
 
       }
       case _: Failure[SimpleHttpResponse] => p.success(new LoginPageView(renderer.get))
-    })
+    })*/
+    p.success(new LoginPageView(renderer.get))
     p.future
   }
 

@@ -5,7 +5,7 @@ import org.sailcbi.VNode.SnabbdomFacade.snabbdom.h
 
 import scala.scalajs.js
 
-sealed abstract class VNodeConstructor(tag: String) {
+abstract class VNodeConstructor(tag: String) {
   def apply[T](c: VNodeContents[T]): VNode = apply(contents = c)
   def apply[T](
     contents: VNodeContents[T] = null,
