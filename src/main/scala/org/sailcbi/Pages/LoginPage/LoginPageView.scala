@@ -17,28 +17,28 @@ import scala.scalajs.js
 import scala.util.{Failure, Success}
 import org.scalajs
 
-class LoginPageView (renderer: VNodeContents[_] => Unit) extends StandardPage[LoginPageModel](renderer) {
+class LoginPageView (renderer: VNodeContents[_] => Unit)(path: String) extends StandardPage[LoginPageModel](renderer) {
   val self = this
-  override val defaultModel: LoginPageModel = LoginPageModel(None, None, Currency.dollars(325), 2017, false)
+  override val defaultModel: LoginPageModel = LoginPageModel(path, None, None, Currency.dollars(325), 2017, false)
 
   object ChangeUserName extends Message[LoginPageModel, String] {
     def update: LoginPageModel => String => LoginPageModel =
-      model => payload => LoginPageModel(Some(payload), model.password, model.jpPrice, model.lastSeason, model.loginRequestPending)
+      model => payload => LoginPageModel(model.path, Some(payload), model.password, model.jpPrice, model.lastSeason, model.loginRequestPending)
   }
   object ChangePassword extends Message[LoginPageModel, String] {
     def update: LoginPageModel => String => LoginPageModel =
-      model => payload => LoginPageModel(model.userName, Some(payload), model.jpPrice, model.lastSeason, model.loginRequestPending)
+      model => payload => LoginPageModel(model.path, model.userName, Some(payload), model.jpPrice, model.lastSeason, model.loginRequestPending)
   }
   object SubmitLoginRequest extends NoArgMessage[LoginPageModel] {
     def update: LoginPageModel => LoginPageModel =
       model => {
         submitLogin(model)
-        LoginPageModel(model.userName, model.password, model.jpPrice, model.lastSeason, true)
+        LoginPageModel(model.path, model.userName, model.password, model.jpPrice, model.lastSeason, true)
       }
   }
   object ReceiveLoginResponse extends NoArgMessage[LoginPageModel] {
     def update: LoginPageModel => LoginPageModel =
-      model => LoginPageModel(model.userName, None, model.jpPrice, model.lastSeason, false)
+      model => LoginPageModel(model.path, model.userName, None, model.jpPrice, model.lastSeason, false)
   }
 
   def submitLogin: (LoginPageModel) => Unit = (model: LoginPageModel) => {
@@ -47,17 +47,24 @@ class LoginPageView (renderer: VNodeContents[_] => Unit) extends StandardPage[Lo
     val body = URLEncodedBody(
       "username" -> model.userName.getOrElse(""),
       "password" -> model.password.getOrElse(""),
-      "redirect-url" -> (Main.BASE_LOCATION + "/login")
+      "redirect-url" -> (Main.BASE_LOCATION + path)
     )
     val request =
       HttpRequest(Main.API_LOCATION + "/authenticate")
         .withMethod(Method.POST)
+        .withHeader("dont-redirect", "true")
         .withBody(body)
 
 
     request.send().onComplete({
-      case res:Success[SimpleHttpResponse] => ReceiveLoginResponse(self)(model)()
-      case _: Failure[SimpleHttpResponse] => ReceiveLoginResponse(self)(model)()
+      case res:Success[SimpleHttpResponse] => {
+        if (res.value.body == "true") Router.transition(path)
+        else ReceiveLoginResponse(self)(model)()
+      }
+      case _: Failure[SimpleHttpResponse] => {
+        println("login failure")
+        ReceiveLoginResponse(self)(model)()
+      }
     })
   }
 
@@ -84,6 +91,11 @@ class LoginPageView (renderer: VNodeContents[_] => Unit) extends StandardPage[Lo
             classes=List("form-control"),
             events = Map("input" -> ((e: scalajs.dom.TextEvent) => {
               ChangePassword(this)(model)(e.target.asInstanceOf[Target].value.toString)
+            }), "keypress" -> ((e: scalajs.dom.KeyboardEvent) => {
+              if(e.keyCode == 13) {
+                println("Enter!")
+                SubmitLoginRequest(this)(model)()
+              }
             }))
           ),
           label(props=Map("for"->"inputPassword"), contents="Password")

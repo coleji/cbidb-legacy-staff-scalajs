@@ -33,9 +33,9 @@ object Router {
         }
         if (pageAndLoginRequired._2 && isLoggedIn) p.success(pageAndLoginRequired._1)
         else if (!pageAndLoginRequired._2) p.success(pageAndLoginRequired._1)
-        else p.success(new LoginPageView(renderer.get))
+        else p.success(new LoginPageView(renderer.get)(path))
       }
-      case _: Failure[SimpleHttpResponse] => p.success(new LoginPageView(renderer.get))
+      case _: Failure[SimpleHttpResponse] => p.success(new LoginPageView(renderer.get)(path))
     })
     p.future
   }
