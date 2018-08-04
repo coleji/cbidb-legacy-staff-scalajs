@@ -17,6 +17,7 @@ object Main {
     val selectedOptions: js.Array[Target] = js.native
   }
 
+
   @js.native
   @JSGlobalScope
   object Globals extends js.Object {
