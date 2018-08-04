@@ -1,6 +1,5 @@
 package org.sailcbi.Core
 
-import org.sailcbi.VNode.SnabbdomFacade.VNode
 import org.sailcbi.VNode.VNodeContents
 
 abstract class View[T <: Model](val renderer: VNodeContents[_] => Unit) {

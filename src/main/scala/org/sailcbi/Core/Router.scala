@@ -4,12 +4,8 @@ import fr.hmil.roshttp.HttpRequest
 import fr.hmil.roshttp.response.SimpleHttpResponse
 import org.sailcbi.CbiUtil.Initializable
 import org.sailcbi.Core.Main.Globals
-import org.sailcbi.Pages.ForgotPWPage.ForgotPWPageView
-import org.sailcbi.Pages.HomePage.HomePageView
 import org.sailcbi.Pages.LoginPage.LoginPageView
 import org.sailcbi.Pages.Test1Page.Test1PageView
-import org.sailcbi.Pages.Test2Page.Test2PageView
-import org.sailcbi.VNode.SnabbdomFacade.VNode
 import org.sailcbi.VNode.VNodeContents
 
 import scala.concurrent.{Future, Promise}

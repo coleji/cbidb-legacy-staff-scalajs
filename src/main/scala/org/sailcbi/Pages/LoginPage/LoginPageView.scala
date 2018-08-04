@@ -4,18 +4,15 @@ import fr.hmil.roshttp.body.URLEncodedBody
 import fr.hmil.roshttp.response.SimpleHttpResponse
 import fr.hmil.roshttp.{HttpRequest, Method}
 import org.sailcbi.CbiUtil.Currency
-import org.sailcbi.Components.{Button, Item, JoomlaArticleRegion}
 import org.sailcbi.Core.Main.Target
 import org.sailcbi.Core._
-import org.sailcbi.VNode.SnabbdomFacade.VNode
 import org.sailcbi.VNode.VNodeContents._
 import org.sailcbi.VNode._
 import org.sailcbi.ViewTemplates.StandardPage
+import org.scalajs
 
 import scala.concurrent.Promise
-import scala.scalajs.js
 import scala.util.{Failure, Success}
-import org.scalajs
 
 class LoginPageView (renderer: VNodeContents[_] => Unit)(path: String) extends StandardPage[LoginPageModel](renderer) {
   val self = this

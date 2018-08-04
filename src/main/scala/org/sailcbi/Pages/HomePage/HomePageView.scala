@@ -1,6 +1,5 @@
 package org.sailcbi.Pages.HomePage
 
-import org.sailcbi.VNode.SnabbdomFacade.VNode
 import org.sailcbi.VNode._
 import org.sailcbi.ViewTemplates.StandardPage
 

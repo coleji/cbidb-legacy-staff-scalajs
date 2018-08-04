@@ -1,7 +1,6 @@
 package org.sailcbi.ViewTemplates
 
 import org.sailcbi.Core.{Model, View}
-import org.sailcbi.VNode.SnabbdomFacade.VNode
 import org.sailcbi.VNode._
 import org.sailcbi.ViewTemplates.StandardPage.{aside, header, main, section}
 

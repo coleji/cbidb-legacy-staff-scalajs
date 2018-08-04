@@ -1,5 +1,6 @@
 package org.sailcbi.Pages.Test1Page
 
+import org.sailcbi.Components.Table
 import org.sailcbi.Core.Router
 import org.sailcbi.VNode.SnabbdomFacade.VNode
 import org.sailcbi.VNode.{VNodeContents, div, span}
@@ -14,8 +15,11 @@ class Test1PageView(renderer: VNodeContents[_] => Unit) extends StandardPage[Tes
     Router.transition("/test2")
   }
 
+  val table: VNode = Table.apply
+
   override def getMain(model: Test1PageModel): VNodeContents[_] = div(VNodeContents(
     "Test 1!",
-    span(events=Map("click" -> goToTest2), contents="go to test2")
+    span(events=Map("click" -> goToTest2), contents="go to test2"),
+    table
   ))
 }
