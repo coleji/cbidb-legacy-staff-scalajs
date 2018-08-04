@@ -15,7 +15,14 @@ class Test1PageView(renderer: VNodeContents[_] => Unit) extends StandardPage[Tes
     Router.transition("/test2")
   }
 
-  val table: VNode = Table.apply
+  val columnNames = js.Array("col1", "col2", "col3")
+  val data: js.Array[js.Array[String]] = js.Array(
+    js.Array("a", "b", "c"),
+    js.Array("d", "e", "f"),
+    js.Array("g", "h", "i")
+  )
+
+  val table: VNode = Table.apply(columnNames, data)
 
   override def getMain(model: Test1PageModel): VNodeContents[_] = div(VNodeContents(
     "Test 1!",
