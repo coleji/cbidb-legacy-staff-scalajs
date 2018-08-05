@@ -12,11 +12,21 @@ case class User (
   email: String,
   active: Boolean,
   hideFromClose: Boolean
-) extends ApiClassFacade
+) extends ApiClassFacade {
+  override def valuesAsJsArray: js.Array[String] = js.Array(
+    userId.toString,
+    userName,
+    firstName,
+    lastName,
+    email,
+    if (active) "Y" else "N",
+    if (hideFromClose) "Y" else "N"
+  )
+}
 
 object User extends  ApiClassFacadeObject[User] {
   val endpoint: String = "users"
-  val fields: Array[(String, String, Class[_])] = Array(
+  val fields: js.Array[(String, String, Class[_])] = js.Array(
     ("USER_ID", "User ID", classOf[Int]),
     ("USER_NAME", "User Name", classOf[String]),
     ("NAME_FIRST", "First Name", classOf[String]),
@@ -28,7 +38,7 @@ object User extends  ApiClassFacadeObject[User] {
   def parse(r: ApiResult): js.Array[User] = {
     def getIndexOfField(fieldName: String): Int = r.data.metaData.indexWhere(_.name == fieldName)
     val parseSingle: (RowObject => User) = {
-      val indexes: Array[Int] = fields.map(f => getIndexOfField(f._1))
+      val indexes: js.Array[Int] = fields.map(f => getIndexOfField(f._1))
       (row: RowObject) => {
         println("%%%")
         println(row)

@@ -1,5 +1,7 @@
 package org.sailcbi.Core
 
-trait ApiClassFacade {
+import scala.scalajs.js
 
+trait ApiClassFacade {
+  def valuesAsJsArray: js.Array[String]
 }
