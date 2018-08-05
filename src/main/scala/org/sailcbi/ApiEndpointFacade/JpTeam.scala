@@ -1,4 +1,4 @@
-package org.sailcbi.Core.ApiEndpointFacade
+package org.sailcbi.ApiEndpointFacade
 
 import org.sailcbi.Core.{ApiResult, RowObject}
 

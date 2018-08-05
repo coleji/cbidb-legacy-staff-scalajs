@@ -1,11 +1,15 @@
 package org.sailcbi.Pages.Test1Page
 
+import org.sailcbi.ApiEndpointFacade.User
 import org.sailcbi.Components.Table
-import org.sailcbi.Core.Router
+import org.sailcbi.Core.{GetObjectsFromAPI, Router}
 import org.sailcbi.VNode.SnabbdomFacade.VNode
 import org.sailcbi.VNode.{VNodeContents, div, span}
 import org.sailcbi.ViewTemplates.StandardPage
 
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
 
 class Test1PageView(renderer: VNodeContents[_] => Unit) extends StandardPage[Test1PageModel](renderer) {
@@ -24,9 +28,15 @@ class Test1PageView(renderer: VNodeContents[_] => Unit) extends StandardPage[Tes
 
   val table: VNode = Table.apply(columnNames, data)
 
-  override def getMain(model: Test1PageModel): VNodeContents[_] = div(VNodeContents(
-    "Test 1!",
-    span(events=Map("click" -> goToTest2), contents="go to test2"),
-    table
-  ))
+  override def getMain(model: Test1PageModel): VNodeContents[_] = {
+    val usersFuture = GetObjectsFromAPI(User).onComplete(r => {
+      println("### " + r.get.length)
+    })
+
+    div(VNodeContents(
+      "Test 1!",
+      span(events=Map("click" -> goToTest2), contents="go to test2"),
+      table
+    ))
+  }
 }
