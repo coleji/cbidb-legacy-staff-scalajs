@@ -5,6 +5,7 @@ import fr.hmil.roshttp.response.SimpleHttpResponse
 import org.sailcbi.CbiUtil.Initializable
 import org.sailcbi.Core.Main.Globals
 import org.sailcbi.Pages.LoginPage.LoginPageView
+import org.sailcbi.Pages.SpotPage.SpotPageView
 import org.sailcbi.Pages.Test1Page.Test1PageView
 import org.sailcbi.VNode.VNodeContents
 
@@ -24,6 +25,7 @@ object Router {
         val isLoggedIn: Boolean = res.get.body != "false"
         val pageAndLoginRequired: (View[_], Boolean) = {
           path match {
+            case "/spot" =>(new SpotPageView(renderer.get), false)
             case _ => (new Test1PageView(renderer.get), true)
           }
         }
