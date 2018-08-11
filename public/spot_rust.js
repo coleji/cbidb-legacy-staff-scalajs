@@ -1,0 +1,1 @@
+/home/jcole/git/spot-rust/public/spot_rust.js

@@ -31,6 +31,7 @@ object Main {
         def protocol: String = js.native
       }
       var onpopstate: js.Any = js.native
+      val alert: js.Function1[Any, Any] = js.native
     }
     object history extends js.Object {
       def pushState(state: js.Object, title: String, path: String): Unit = js.native
