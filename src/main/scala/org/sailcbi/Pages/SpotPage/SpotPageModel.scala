@@ -36,6 +36,10 @@ case class SpotPageModel(turn: Owner, board: js.Array[js.Array[Square]], highlig
     case None => None
   }
 
+  def serializeBoard(): String = {
+    board.map(row => row.map(s => s.owner.toString).join("")).mkString(":")
+  }
+
   def movesAway(from: Square, away: Int): Set[Square] = {
     def squareList(i: Int, away: Int): Seq[Int] = (i-away to i+away).toList.filter(r => r >= 0 && r < board.length)
 
@@ -102,9 +106,15 @@ object SpotPageModel {
   class Square(val owner: Owner)
 
   abstract class Owner
-  case object NoOwner extends Owner
-  case object P1 extends Owner
-  case object P2 extends Owner
+  case object NoOwner extends Owner {
+    override def toString: String = "0"
+  }
+  case object P1 extends Owner {
+    override def toString: String = "1"
+  }
+  case object P2 extends Owner {
+    override def toString: String = "2"
+  }
 
   abstract class SquareState
   case object Normal extends SquareState
@@ -128,4 +138,14 @@ object SpotPageModel {
       })
     })
   }, None)
+
+  def deserializeBoard(s: String): js.Array[js.Array[Square]] = {
+    import js.JSConverters._
+    val rows: js.Array[String] = s.split(":").toJSArray
+    rows.map(ss => ss.toCharArray.map(_.toString).map({
+      case "1" => new Square(P1)
+      case "2" => new Square(P2)
+      case "0" => new Square(NoOwner)
+    }).toJSArray)
+  }
 }

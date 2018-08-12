@@ -23,7 +23,7 @@ class SpotPageView(renderer: VNodeContents[_] => Unit) extends StandardPage[Spot
       model => square => {
         println("attempting a move")
         val ret = model.move(square)
-        if (model.turn == P1 && ret.turn == P2) WasmInterface.callRust("comp turn", (s) => Globals.window.alert(s))
+        if (model.turn == P1 && ret.turn == P2) WasmInterface.callRust(ret.serializeBoard(), (s) => Globals.window.alert(s))
         ret
       }
   }
