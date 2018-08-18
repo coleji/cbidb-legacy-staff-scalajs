@@ -2,8 +2,9 @@ package org.sailcbi.Pages.SpotPage
 
 import org.sailcbi.Core.Model
 import org.sailcbi.Pages.SpotPage.SpotPageModel._
-
 import org.sailcbi.Core.CastableToJSArray.RangeToJSArray.wrapRange
+import org.sailcbi.Core.Main.Globals
+
 import scala.scalajs.js
 
 
@@ -65,34 +66,47 @@ case class SpotPageModel(turn: Owner, board: js.Array[js.Array[Square]], highlig
     case None => Set.empty
   }
 
-  def highlight(s: Square): SpotPageModel = highlighted match {
-    case None => SpotPageModel(turn, board, Some(s))
-    case Some(h) =>
-      if (h == s) SpotPageModel(turn, board, None)
-      else if (h.owner == turn) SpotPageModel(turn, board, Some(s))
-      else this
+  def highlight(s: Square): SpotPageModel = {
+    highlighted match {
+      case None => SpotPageModel(turn, board, Some(s))
+      case Some(h) =>
+        if (h == s) SpotPageModel(turn, board, None)
+        else if (h.owner == turn) SpotPageModel(turn, board, Some(s))
+        else this
+    }
   }
 
-  def move(s: Square): SpotPageModel = isValidMove(s, turn) match {
-    case Invalid => this
-    case Copy => SpotPageModel(nextTurn, board.map(row => {
-      val takeOverSet = movesAway(s, 1)
-      row.map(cell => {
-        if (cell == s) new Square(turn)
-        else if (takeOverSet.contains(cell) && cell.owner == nextTurn) new Square(turn)
-        else cell
-      })
-    }), None)
-    case Jump => SpotPageModel(nextTurn, board.map(row => {
-      val takeOverSet = movesAway(s, 1)
-      row.map(cell => {
-        if (cell == s) new Square(turn)
-        else if (cell == highlighted.get) new Square(NoOwner)
-        else if (takeOverSet.contains(cell) && cell.owner == nextTurn) new Square(turn)
-        else cell
-      })
-    }), None)
-    case _ => this
+  def move(s: Square): SpotPageModel = {
+    isValidMove(s, turn) match {
+      case Invalid => {
+        Globals.console.log("invalid move! player turn: " + turn + " highlighted: " + this.highlighted)
+        Globals.console.log(this.serializeBoard())
+        this
+      }
+      case Copy => SpotPageModel(nextTurn, board.map(row => {
+        val takeOverSet = movesAway(s, 1)
+        row.map(cell => {
+          if (cell == s) new Square(turn)
+          else if (takeOverSet.contains(cell) && cell.owner == nextTurn) new Square(turn)
+          else cell
+        })
+      }), None)
+      case Jump => SpotPageModel(nextTurn, board.map(row => {
+        val takeOverSet = movesAway(s, 1)
+        row.map(cell => {
+          if (cell == s) new Square(turn)
+          else if (cell == highlighted.get) new Square(NoOwner)
+          else if (takeOverSet.contains(cell) && cell.owner == nextTurn) new Square(turn)
+          else cell
+        })
+      }), None)
+      case _ => this
+    }
+  }
+
+  def highlightAndMove(from: Square, to: Square): SpotPageModel = {
+    val highlightedModel = this.highlight(from)
+    highlightedModel.move(to)
   }
 
   def isValidMove(s: Square, owner: Owner): Move = {

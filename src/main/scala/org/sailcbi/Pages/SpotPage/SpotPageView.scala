@@ -11,6 +11,7 @@ import scala.scalajs.js
 
 
 class SpotPageView(renderer: VNodeContents[_] => Unit) extends StandardPage[SpotPageModel](renderer) {
+  val self = this
   override val defaultModel: SpotPageModel = SpotPageModel.startingBoard(7)
 
   object Highlight extends Message[SpotPageModel, Square] {
@@ -23,12 +24,31 @@ class SpotPageView(renderer: VNodeContents[_] => Unit) extends StandardPage[Spot
       model => square => {
         println("attempting a move")
         val ret = model.move(square)
-        if (model.turn == P1 && ret.turn == P2) WasmInterface.callRust(ret.serializeBoard(), (s) => Globals.window.alert(s))
+        if (model.turn == P1 && ret.turn == P2) WasmInterface.callRust(ret.serializeBoard(), (s) => {
+          val regex = raw"(\d),(\d)>(\d),(\d)".r
+          s match {
+            case regex(a: String, b, c, d) => {
+              val from: Square = ret.board(a.toInt)(b.toInt)
+              val to: Square = ret.board(c.toInt)(d.toInt)
+              HighlightAndMove(self)(ret)((from, to))
+            }
+            case _ => Globals.window.alert("Got bogus move " + s)
+          }
+          Globals.console.log(s)
+        })
         ret
       }
   }
 
+  type TwoSquares = (Square, Square)
+
+  object HighlightAndMove extends Message[SpotPageModel, TwoSquares] {
+    def update: SpotPageModel => TwoSquares => SpotPageModel =
+      model => t => model.highlightAndMove(t._1, t._2)
+  }
+
   override def getMain(model: SpotPageModel): VNodeContents[_] = {
+    Globals.console.log("rendering: owner is " + model.turn + " square highlighted? " + model.highlighted.isDefined)
     div(contents=VNodeContents(
       table(props=Map("cellpadding" -> "5"), contents=tbody(contents=
         VNodeContents(model.board.map(row => tr(
@@ -48,8 +68,8 @@ class SpotPageView(renderer: VNodeContents[_] => Unit) extends StandardPage[Spot
                 else Map.empty
               }
               case P2 => {
-                if (model.turn == P2) Map("click" -> (() => Highlight(this)(model)(c)))
-                else Map.empty
+                /*if (model.turn == P2) Map("click" -> (() => Highlight(this)(model)(c)))
+                else */Map.empty
               }
             }
             td(

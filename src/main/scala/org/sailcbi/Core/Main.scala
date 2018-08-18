@@ -32,9 +32,13 @@ object Main {
       }
       var onpopstate: js.Any = js.native
       val alert: js.Function1[Any, Any] = js.native
+      def setTimeout(f: js.Function0[Any], t: Int): Unit = js.native
     }
     object history extends js.Object {
       def pushState(state: js.Object, title: String, path: String): Unit = js.native
+    }
+    object console extends js.Object {
+      def log(s: String): Unit = js.native
     }
   }
 
