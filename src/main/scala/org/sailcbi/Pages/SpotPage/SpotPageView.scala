@@ -30,7 +30,9 @@ class SpotPageView(renderer: VNodeContents[_] => Unit) extends StandardPage[Spot
             case regex(a: String, b, c, d) => {
               val from: Square = ret.board(a.toInt)(b.toInt)
               val to: Square = ret.board(c.toInt)(d.toInt)
-              HighlightAndMove(self)(ret)((from, to))
+              Globals.window.setTimeout(() => {
+                HighlightAndMove(self)(ret)((from, to))
+              }, 1000)
             }
             case _ => Globals.window.alert("Got bogus move " + s)
           }
